@@ -1,11 +1,12 @@
 var score =0;
-var gun,bubble, bullet;
+var gun,bubble, bullet, backBoard, gameOver;
 var gunImg,bubbleImg, bulletImg, gameOverImg,  blastImg, backBoardImg;
 var bubbleGroup, bulletGroup;
 var obstaclesGroup;
 var spaceKeyActive= false
 var life =3;
-var score=0
+var score=0;
+var gameState=1
 function preload(){
   gunImg = loadImage("gun1.png")
   blastImg = loadImage("blast.png")
@@ -35,9 +36,7 @@ function setup() {
 
 function draw() {
   background("#BDA297");
-  textSize(20)
-  fill("white")
-
+  
   heading.html("Life: "+life)
   heading.style('color:red'); 
   heading.position(150,20)
@@ -45,34 +44,37 @@ function draw() {
   scoreboard.html("Score: "+score)
   scoreboard.style('color:red'); 
   scoreboard.position(width-200,20)
-  gun.y=mouseY  
-  
-  
-  if (frameCount % 60 === 0) {
-    drawBubble();
+
+  if(gameState===1){
+    gun.y=mouseY  
+    if (frameCount % 60 === 0) {
+      drawBubble();
+    }
+
+    if(keyDown("space")){
+      shootBullet();
+      spaceKeyActive=true
+    }
+
+    if (bubbleGroup.collide(backBoard)) {
+      handleGameover();
+    }
+    
+    if(bubbleGroup.collide(bulletGroup))
+    {
+      handleBubbleCollision();
+    }
+    drawSprites();
   }
+    
   
-  if(keyDown("space")){
-    shootBullet();
-    spaceKeyActive=true
-  }
-  
-  if (bubbleGroup.collide(backBoard)) {
-    handleGameover();
-  }
-  
-  if(bubbleGroup.collide(bulletGroup))
-  {
-    handleBubbleCollision();
-  }
-  drawSprites();
 }
 
 function drawBubble(){
    bubble = createSprite(800,random(20,780),40,40);
    bubble.addImage(bubbleImg);
    bubble.scale = 0.1;
-   bubble.velocityX = -3;
+   bubble.velocityX = -8;
    bubble.lifetime = 400;
    bubbleGroup.add(bubble);
 }
@@ -81,7 +83,7 @@ function shootBullet(){
   bullet= createSprite(100, width/2, 50,20)
   bullet.y= gun.y-20
   bullet.addImage(bulletImg)
-  bullet.scale=0.15
+  bullet.scale=0.2
   bullet.velocityX= 5
   bulletGroup.add(bullet)
 }
@@ -119,16 +121,17 @@ function handleGameover(){
     bubbleGroup.destroyEach();
 
     if (life === 0) {
-     
-      bulletGroup.destroyEach();
-      bubbleGroup.destroyEach();
-      gun.destroy()
-      backBoard.destroy();
-
-      //bubble.velocityX=0
-
-      gameOver=createSprite(width/2,height/2)
-      gameOver.addImage(gameOverImg)
+      gameState=2
+      
+      swal({
+        title: `Game Over`,
+        text: "Oops you lost the game....!!!",
+        text: "Your Score is " + score,
+        imageUrl:
+          "https://cdn.shopify.com/s/files/1/1061/1924/products/Thumbs_Down_Sign_Emoji_Icon_ios10_grande.png",
+        imageSize: "100x100",
+        confirmButtonText: "Thanks For Playing"
+      });
     }
   //}
 }
